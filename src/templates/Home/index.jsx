@@ -88,7 +88,7 @@ export class Home extends Component {
           <div className="posts"> 
           
           {filteredPosts.map(post => (
-            <PostCard id={post.id} post={post} />
+            <PostCard key={post.id} id={post.id} post={post} />
           )) }
         </div>
         <div className="buttonContainer">
