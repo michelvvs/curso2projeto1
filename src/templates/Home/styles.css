@@ -1,0 +1,15 @@
+.container {
+  min-height: 100vh;
+  background: #eee;
+  padding: 30px;
+}
+
+.search-container {
+  margin-bottom: 30px;
+
+}
+
+.search-container h2 {
+  margin-bottom: 30px;
+  
+}
