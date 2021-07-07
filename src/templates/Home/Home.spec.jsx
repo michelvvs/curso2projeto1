@@ -2,6 +2,7 @@ import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import { render, screen, waitForElementToBeRemoved } from '@testing-library/react';
 import { Home } from '.';
+import userEvent from '@testing-library/user-event';
 
 const handlers = [
   rest.get('https://jsonplaceholder.typicode.com/posts', async (req, res, ctx) => {
@@ -91,6 +92,57 @@ describe('<Home />', () => {
     render(<Home />);
     const noMorePosts = screen.getByText('nadicas, baby');
     await waitForElementToBeRemoved(noMorePosts);
+
+    const search = screen.getByPlaceholderText(/digite sua busca aqui/i);
+    expect(search).toBeInTheDocument();
+
+    const images = screen.getAllByRole('img', { name: /title/i });
+    expect(images).toHaveLength(2);
+
+    const button = screen.getByRole('button', { name: /restantes/i });
+    expect(button).toBeInTheDocument();
+
     //screen.debug();
+  });
+
+  it('should search get post correctly', async () => {
+    render(<Home />);
+    const noMorePosts = screen.getByText('nadicas, baby');
+    expect.assertions(7);
+
+    await waitForElementToBeRemoved(noMorePosts);
+
+    const search = screen.getByPlaceholderText(/digite sua busca aqui/i);
+    //expect(search).toBeInTheDocument();
+
+    expect(screen.getByRole('heading', { name: /title1/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /title2/i })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /title3/i })).not.toBeInTheDocument();
+
+    userEvent.type(search, '3');
+
+    expect(screen.queryByRole('heading', { name: /title1/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /title2/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /title3/i })).toBeInTheDocument();
+
+    userEvent.type(search, 'DTCGVYUBHIJNKML<Ç POST DOES NOT EDIT (TEST)');
+    expect(screen.getByText('nadicas, baby')).toBeInTheDocument();
+  });
+
+  it('should load more posts', async () => {
+    render(<Home />);
+    const noMorePosts = screen.getByText('nadicas, baby');
+    //expect.assertions(7);
+
+    await waitForElementToBeRemoved(noMorePosts);
+
+    const button = screen.getByRole('button', { name: /restantes/i });
+    expect(button).toBeInTheDocument();
+
+    expect(screen.queryByRole('heading', { name: /title3/i })).not.toBeInTheDocument();
+
+    userEvent.click(button);
+    expect(screen.queryByRole('heading', { name: /title3/i })).toBeInTheDocument();
+    expect(button).toBeDisabled();
   });
 });
